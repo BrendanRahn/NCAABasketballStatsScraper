@@ -16,54 +16,56 @@ class Parser:
             self.index -= 1
             return x
         
-    class DataParser:
-        # def __init__(self, string):
-        #     self.index = len(string) - 1
-        #     self.string = string
 
-        # def __iter__(self):
-        #     return self
-        
-        # def __next__(self):
-        #     if (self.index >= len(self.string)):
-        #         raise StopIteration
-        #     x = self.string[self.index]
-        #     self.index -= 1
-        #     return x
-
-        def getColumnNames(self, string):
-            soup = BeautifulSoup(string)
-            theaders = soup.thead.find_all("th")
-            return [th.string for th in theaders]
-
-        def getData(self, string):
-            soup = BeautifulSoup(string)
-            tbody = soup.tbody.find_all("tr")
-            test = tbody[0].find_all("td")
-            data = []  
-            for tr in tbody:
-                values = [td.string for td in tr.find_all("td")]
-                data.append(values)
-            return data
+    def getData(self, string: str):
+        soup = BeautifulSoup(string, features="html.parser")
+        tbody = soup.tbody.find_all("tr")
+        data = []  
+        for tr in tbody:
+            row = [td.string for td in tr.find_all("td")]
+            data.append(row)
+        return data
+    
+    # def sanitizeData(self, row: list) -> list:
+        # try:
+        #     map(lambda x: int(x), row)
+        # except:
+            
 
 
-    def getStatisticName(self, url: str) -> str:
-        urlAsIter = iter(self.ReverseIterator(url))
+    def getTableName(self, url: str) -> str:
+        try: 
+            url = url[:url.index("?")]
+        except:
+            url = url
+        urlAsRIter = iter(self.ReverseIterator(url))
 
-        statisticName = ""
-        for chr in urlAsIter:
+        tableName = ""
+        for chr in urlAsRIter:
             match chr:
                 case "-":
-                    statisticName = "_" + statisticName
+                    tableName = "_" + tableName
                 case "/":
-                    return statisticName
+                    break
                 case _:
-                    statisticName = chr + statisticName
+                    tableName = chr + tableName
+
+        if re.search("player-stat", url):
+            tableName = "player_" + tableName
+        else:
+            tableName = "team_" + tableName
+        
+        return tableName
 
 
-    # def getStatisticData(self, string):
-    #     data = {}
-    #     for chr in string:
-    #         match chr:
+    def getParamValues(self, url: str) -> list[str]:
+
+        # matches = re.match("=", url)
+        # for match in matches:
+        #     start = match. 
+
+
+        return url[url.index("=")+1:]
+        
 
 
