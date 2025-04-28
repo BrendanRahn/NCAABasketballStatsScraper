@@ -1,0 +1,30 @@
+[project]
+name = "ncaabasketballstatsscraper"
+version = "0.1.0"
+description = "contains python scripts to scrape ncaa basketball stats data from the web and sql scripts to insert the data into a postgres database"
+authors = [
+    {name = "Brendan Rahn",email = "brendanrahn01@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "dotenv (>=0.9.9,<0.10.0)",
+    "psycopg2 (>=2.9.10,<3.0.0)",
+    "bs4 (>=0.0.2,<0.0.3)",
+    "requests (>=2.32.3,<3.0.0)"
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false
+packages = [
+    {include = "ncaabasketballstatsscraper"}
+]
+
+[tool.poetry.scripts]
+init_db = "ncaabasketballstatsscraper.initDatabase:main"
+
+

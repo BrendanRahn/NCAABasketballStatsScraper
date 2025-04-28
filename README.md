@@ -5,7 +5,11 @@ TODO:
 - Set up scraper for Stathead webpages
 
 
-Setup:
-- Because there is no containerization or package manager, you will have to install individual Python packages for your environment
-- Code makes a connection to a Postgres server hosted on your local machine, connection string parameters will have to be put into an .env file in the root directory
-  
+# Requirements
+- Poetry
+    - Download: https://python-poetry.org/docs/#installation
+- PostgresSQL
+    - Download: https://www.postgresql.org/download/
+
+
+
