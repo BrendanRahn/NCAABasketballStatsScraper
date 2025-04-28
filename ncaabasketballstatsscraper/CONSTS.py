@@ -34,6 +34,19 @@ TEAM_COLUMNS = [
         ]
 
 QUERIES = {
+
+    "checkDatabaseExists": '''
+                        SELECT EXISTS
+                        (
+                            SELECT 1 FROM pg_catalog.pg_database 
+                            WHERE datname = (%s)
+                        )
+                        ''',
+
+    "createDatabase": '''
+                        CREATE DATABASE (%s)
+                    ''',
+
     "createUrlsTable": '''
                         CREATE TABLE IF NOT EXISTS urls 
                         (
@@ -45,6 +58,7 @@ QUERIES = {
     "loadUrlsTable": '''
                         INSERT INTO urls (statistic, url) 
                         VALUES (%s, %s)
+                        ON CONFLICT DO NOTHING
                      ''',
                        
     "createTeamStatTableForTeam": '''

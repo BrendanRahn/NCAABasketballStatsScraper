@@ -11,7 +11,6 @@ def createUrlsTable(cursor):
     service = Service()
     parser = Parser()
     urls = service.getUrls()
-    #rename loadTableParams
     tableData = [(parser.getTableName(url), url) for url in urls] 
     cursor.execute(CONSTS.QUERIES["createUrlsTable"])
     cursor.executemany(CONSTS.QUERIES["loadUrlsTable"], tableData)
@@ -25,15 +24,19 @@ def createTables(cursor):
         query = f'CREATE TABLE {table.name} //columns'
 
 def createNcaaBasketballDatabase():
-    conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("DEFAULT_DB")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
-    conn = psycopg2.connect(conn_string)
-    conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-    cur = conn.cursor()
+    default_conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("DEFAULT_DB")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
+    default_conn = psycopg2.connect(default_conn_string)
+    default_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    cur = default_conn.cursor()
 
-    cur.execute(f'CREATE DATABASE {os.getenv("DB_NAME")}')
+    sanitizedDbName = (os.getenv("DB_NAME"),)
+    cur.execute(CONSTS.QUERIES["checkDatabaseExists"], sanitizedDbName)
+    dbExists = cur.fetchone()[0]
+    if not dbExists:
+        cur.execute(CONSTS.QUERIES["createDatabase"], sanitizedDbName)
 
     cur.close()
-    conn.close()
+    default_conn.close()
 
 def main():
     dotenv.load_dotenv()
