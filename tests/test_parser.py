@@ -1,5 +1,8 @@
 import json
 import os
+import sys
+
+sys.path.append(".")
 #TODO: Make parser import from parent directory
 from ncaabasketballstatsscraper.Parser import Parser
 
