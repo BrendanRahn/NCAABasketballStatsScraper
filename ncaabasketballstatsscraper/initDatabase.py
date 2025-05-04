@@ -1,10 +1,12 @@
 import psycopg2
+from psycopg2 import sql
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import os
 import dotenv
 from .Service import Service
 from .Parser import Parser
 from . import CONSTS
+from . import QUERIES
 
 
 def createUrlsTable(cursor):
@@ -12,16 +14,22 @@ def createUrlsTable(cursor):
     parser = Parser()
     urls = service.getUrls()
     tableData = [(parser.getTableName(url), url) for url in urls] 
-    cursor.execute(CONSTS.QUERIES["createUrlsTable"])
-    cursor.executemany(CONSTS.QUERIES["loadUrlsTable"], tableData)
+    cursor.execute(QUERIES.createUrlsTable)
+    cursor.executemany(QUERIES.loadUrlsTable, tableData)
 
-def createTables(cursor):
+def createAndLoadTables(cursor):
     service = Service()
-    sortedUrlsByTable = service.getSortedUrlsByTable()
-    for tableName in sortedUrlsByTable.keys():
-        schema = "teamStat"
-        table = service.getDataForTable(tableName, sortedUrlsByTable[tableName])
+    tablesWithTheirUrls = service.getTablesAndTheirUrls()
+    for tableName in tablesWithTheirUrls.keys():
+        sanatizedSchema = ("teamStat",)
+        table = service.getDataForTable(tableName, tablesWithTheirUrls[tableName])
         query = f'CREATE TABLE {table.name} //columns'
+#temp
+def testLoadOneTable(cursor):
+    service = Service()
+    tablesWithTheirUrls = service.getTablesAndTheirUrls()
+    table = tablesWithTheirUrls.keys()[0]
+    
 
 def createNcaaBasketballDatabase():
     default_conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("DEFAULT_DB")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
@@ -29,11 +37,15 @@ def createNcaaBasketballDatabase():
     default_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = default_conn.cursor()
 
-    sanitizedDbName = (os.getenv("DB_NAME"),)
-    cur.execute(CONSTS.QUERIES["checkDatabaseExists"], sanitizedDbName)
+    dbbName = os.getenv("DB_NAME")
+    cur.execute(QUERIES.checkDatabaseExists.format(
+        database=sql.Identifier(dbbName).string
+    ))
     dbExists = cur.fetchone()[0]
     if not dbExists:
-        cur.execute(CONSTS.QUERIES["createDatabase"], sanitizedDbName)
+        cur.execute(QUERIES.createDatabase.format(
+            database=sql.Identifier(dbbName).string
+            ))
 
     cur.close()
     default_conn.close()
