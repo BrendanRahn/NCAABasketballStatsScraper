@@ -1,28 +1,27 @@
 import json
 import os
 import sys
+import pytest
 
-sys.path.append(".")
-#TODO: Make parser import from parent directory
-from ncaabasketballstatsscraper.Parser import Parser
-
-
-class MockData:
-    def mockHtml():
-        html = str
-        path = os.getcwd() + "\\tests\\models\\mock_html.html"
-        with open(path, "r") as f:
-            html = f.readlines(),
-        f.close()
-        return html
+def test_getData_returnsData(parser, mockHtml):
+    res = parser.getData(mockHtml)
+    assert res == [('32', 'N Florida', '83.2', '87.0', '81.0', '84.7', '82.6', '75.6'),
+                    ('34', 'Georgia', '83.1', '80.7', '100.0', '89.9', '71.3', '74.7'),
+                    ('37', 'PJ Hall', 'Clemson Tigers', 'C', '0.61'),
+                    ('38', 'Tayton Conerway', 'Troy Trojans', 'G', '0.61')]
     
-@pytest.fixture
-def parser():
-    return Parser()
 
-def test_getData_returnsData(parser):
-    mockData =  MockData.mockHtml()
-    res = parser.getData(mockData)
-    return res
+def test_getParamValues_returnsParamValues(parser):
+    url = 'https://example.com/page?param1=value1&param2=value2&param3=value3'
+    res = parser.getParamValues(url)
+    assert res == ['value1', 'value2', 'value3']
 
-test_getData_returnsData()
+def test_getPlayerSchemaName_returnsPlayerSchemaName(parser):
+    url = 'https://example.com/player-stat/page?param1=value1&param2=value2&param3=value3'
+    res = parser.getSchemaName(url)
+    assert res == 'player'
+
+def test_getTeamSchemaName_returnsTeamSchemaName(parser):
+    url = 'https://example.com/page?param1=value1&param2=value2&param3=value3'
+    res = parser.getSchemaName(url)
+    assert res == 'team'
