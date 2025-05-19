@@ -12,7 +12,7 @@ createDatabase = '''
                 '''
 
 createSchema =  '''
-                CREATE SCHEMA {schema}
+                CREATE SCHEMA IF NOT EXISTS {schema}
                 '''
 
 createUrlsTable =  '''
@@ -45,9 +45,8 @@ createTeamStatTeamTable =  '''
                             '''
 
 
-insertStats = '''
-                 -- use psycopg2 execute_values 
-                 -- no indexes on tables at first
-                 --auto commit turned off
+insertTeamStats = '''
+                INSERT INTO %(tableName)s (team, rank, currentSeason, last3, last1, home, away, previousSeason)
+                VALUES %(values)s
                 '''
     
