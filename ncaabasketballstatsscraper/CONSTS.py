@@ -1,5 +1,5 @@
 
-SEASON_IDS_TO_YEARS = {year:id for (year,id) in zip([str(i) for i in range(304,321)], [str(i) for i in range(2007,2024)])}
+SEASON_IDS_TO_YEARS = {year:id for (year,id) in zip([str(i) for i in range(304,322)], [str(i) for i in range(2007,2025)])}
 
 PLAYER_COLUMNS = [
             "rank",
