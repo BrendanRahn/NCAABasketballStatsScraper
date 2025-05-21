@@ -17,19 +17,21 @@ class Parser:
             return x
         
 
-    def getData(self, string: str):
+    def getData(self, string: str) -> list[list[str]]:
         soup = BeautifulSoup(string, features="html.parser")
-        trows = soup.tbody.find_all("tr")
-        data = []  
+        trows = soup.tbody.find_all("tr") # type: ignore
+        data = []
         for tr in trows:
-            rowData = [td.string for td in tr.find_all("td")]
-            data.append(rowData)
+            rowData = (tr.find_all("td"))  # type: ignore
+            stringData = [d.get_text().strip() for d in rowData]
+            data.append(stringData)
         return data
     
-    # def sanitizeData(self, row: list) -> list:
-        # try:
-        #     map(lambda x: int(x), row)
-        # except:
+    def sanitizeNumericPlayerData(self, data: list[str]) -> list[str]:
+        valueColumnIndex = 4
+        data[valueColumnIndex] = re.sub(r'%', '', data[valueColumnIndex]) # type: ignore
+
+        return data
             
 
 
@@ -57,10 +59,18 @@ class Parser:
             tableName = "team_" + tableName
         
         return tableName
+    
+    def getSchemaName(self, url: str) -> str:
+        if re.search("player-stat", url):
+            schemaName = "player"
+        else:
+            schemaName = "team"
 
+        return schemaName   
 
+    #reanme getUrlParams?
     def getParamValues(self, url: str) -> list[str]:
-        return re.findall("(?<=\=)([^&]*)(?=\&)", url)
+        return re.findall("(?<=\=)([^&]*)", url)
         
 
 
