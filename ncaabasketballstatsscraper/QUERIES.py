@@ -30,9 +30,9 @@ loadUrlsTable =  '''
                 '''
                        
 createTeamStatTeamTable =  '''
-                            CREATE TABLE %s
+                            CREATE TABLE IF NOT EXISTS {tableName}
                             (
-                                team varchar(50) PRIMARY KEY,
+                                team varchar(50) PRIMARY KEY, ####should be composite
                                 rank int,
                                 currentSeason int,
                                 last3 decimal,
@@ -43,10 +43,26 @@ createTeamStatTeamTable =  '''
 
                             )
                             '''
-
+createTeamStatPlayerTable =  '''
+                            CREATE TABLE IF NOT EXISTS {tableName}
+                            (
+                                rank int,
+                                player varchar(50),
+                                team varchar(50),
+                                position varchar(5),
+                                value decimal,
+                                split varchar(50),
+                                year int
+                            )
+                            '''
 
 insertTeamStats = '''
-                INSERT INTO %(tableName)s (team, rank, currentSeason, last3, last1, home, away, previousSeason)
-                VALUES %(values)s
+                INSERT INTO {tableName} (team, rank, currentSeason, last3, last1, home, away, previousSeason)
+                VALUES %s
+                '''
+
+insertPlayerStats = '''
+                INSERT INTO {tableName} (rank, player, team, position, value, split, year)
+                VALUES %s
                 '''
     
