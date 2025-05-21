@@ -8,6 +8,7 @@ import time
 import re
 
 class Service: 
+    parser = Parser()
 
     def __init__(self):
          self.URLS = self.getUrls()
@@ -28,15 +29,16 @@ class Service:
 
         res = requests.get(STATS_URL).content.decode()
         soup = BeautifulSoup(res, features="html.parser")
-        tags = soup.main.find_all("a")
-        routes = [tag["href"] for tag in tags if len(tag["href"]) > 1]
-        urls = [BASE_URL + route for route in routes]
+        tags = soup.main.find_all("a") # type: ignore
+        routes = [tag["href"] for tag in tags if len(tag["href"]) > 1] # type: ignore
+        urls = [BASE_URL + route for route in routes] # type: ignore
         
         return urls
     
     def getPageHtmlAsString(self, url: str) -> str:
          res = requests.get(url).content.decode()
          return res
+    
          
     def writeUrlsToFile(self) -> None:
         with open("statsURLs.txt", "w") as f:
@@ -46,10 +48,10 @@ class Service:
 
     # Obsolete?
     def getTableNames(self) -> list[str]:
-        parser = Parser()
+        
         tableNames = []
         for url in self.URLS:
-            tableNames.append(parser.getTableName(url))
+            tableNames.append(self.parser.getTableName(url))
         return tableNames
     
     def addSplitsToPlayerUrls(self, urls, splits):
@@ -65,6 +67,7 @@ class Service:
     
     
     def getParameterizeUrls(self, urls) -> list[str]:
+        #rename - sorted how?
         sortedUrls = {
               "player-stat": [],
               "team-stat": []
@@ -81,27 +84,24 @@ class Service:
                 self.addDatesToTeamUrls(sortedUrls["team-stat"], self.DATES)
                 )
     
-    def getSortedUrlsByTable(self) -> dict:
-        parser = Parser()
+    def getTablesAndTheirUrls(self) -> dict:
         urlsByTable = defaultdict(list)
         parameterizedUrls = self.getParameterizeUrls(self.URLS)
         for url in parameterizedUrls:
-            tableName = parser.getTableName(url)
+            tableName = self.parser.getTableName(url)
             urlsByTable[tableName].append(url)
 
         return urlsByTable
 
     
-    def getDataForTable(self, tableName: str, tableUrls: list[str]) -> list[Table]:
-        parser = Parser()
+    def getDataForTable(self, tableName: str, tableUrls: list[str]) -> Table:
 
-        table = Table()
-        table.tableName = tableName
-        table.columns = CONSTS.TEAM_COLUMNS 
+        table = Table(tableName)
 
         for url in tableUrls:
-            paramValues = parser.getParamValues(url)
+            paramValues = self.parser.getParamValues(url)
             if len(paramValues) > 1:
+                #cast website year id to actual year
                 paramValues[-1] = CONSTS.SEASON_IDS_TO_YEARS[paramValues[-1]]
 
             # sleep for 1s to avoid (potentially?) getting ip blocked
@@ -109,26 +109,25 @@ class Service:
             time.sleep(1)
             html = self.getPageHtmlAsString(url)
             
-            data = [row + paramValues for row in parser.getData(html)]
+            data = [row + paramValues for row in self.parser.getData(html)]
             table.appendData(data)
 
 
         return table
             
     #temporary
-    def getOneTable(self) -> list[Table]:
-        parser = Parser()
-        urlsWithParam = self.parameterizeUrls(self.URLS)
-        sortedUrlsByTable = self.sortUrlsByTable(urlsWithParam)
+    def getOneTable(self, tableName: str, tableUrls: list[str]) -> Table:
+        firstUrl = tableUrls[0]
 
-        tables = []
-        tableName = next(iter(sortedUrlsByTable))
-        table = Table()
-        table.tableName = tableName
-        table.columns = CONSTS.TEAM_COLUMNS 
+        table = Table(tableName)
 
-        for url in sortedUrlsByTable[tableName]:
-            paramValues = parser.getParamValues(url)
+        if table.schemaName == "player":
+            table.columns = CONSTS.PLAYER_COLUMNS
+        elif table.schemaName == "team":
+            table.columns = CONSTS.TEAM_COLUMNS
+
+        for url in tableUrls:
+            paramValues = self.parser.getParamValues(url)
             if len(paramValues) > 1:
                 paramValues[-1] = CONSTS.SEASON_IDS_TO_YEARS[paramValues[-1]]
                 
@@ -137,13 +136,51 @@ class Service:
             time.sleep(1)
             html = self.getPageHtmlAsString(url)
             
-            data = [row + paramValues for row in parser.getData(html)]
+            data = [row + paramValues for row in self.parser.getData(html)]
             table.appendData(data)
 
-        tables.append(table)
-        return tables
+        
+        return table
+    
+    #temporary
+    def getOneUrlDataForTable(self, tableName: str, tableUrls: list[str]) -> Table:
+        firstUrl = tableUrls[0]
+
+        table = Table(tableName)
+        table.schemaName = self.parser.getSchemaName(firstUrl)
+        table.tableName = tableName
+
+        if table.schemaName == "player":
+            table.columns = CONSTS.PLAYER_COLUMNS
+        elif table.schemaName == "team":
+            table.columns = CONSTS.TEAM_COLUMNS
 
 
+        paramValues = self.parser.getParamValues(tableUrls[0])
+        if len(paramValues) > 1:
+            paramValues[-1] = CONSTS.SEASON_IDS_TO_YEARS[paramValues[-1]]
+            
+        # sleep for 1s to avoid (potentially?) getting ip blocked
+        print(f'getting data for {table.tableName} + {paramValues}')
+        time.sleep(1)
+        html = self.getPageHtmlAsString(tableUrls[0])
+        
+        listData = self.parser.getData(html)
+
+        if table.schemaName == "player":
+            # listData[valueColumnIndex] = parser.sanitizeNumericData(listData[valueColumnIndex])
+            listData = [self.parser.sanitizeNumericPlayerData(row) for row in listData]
+
+        # need to add year (example) to data row
+        dataWithYearAppended = [row + paramValues for row in listData]
+        table.appendData(dataWithYearAppended)
+
+        
+        return table
+    
+
+    def aggregatePlayerData(self, data: list[str]) -> list[str]:
+        sanitizedData = []
     
 
 
