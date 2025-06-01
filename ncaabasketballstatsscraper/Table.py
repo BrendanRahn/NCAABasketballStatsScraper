@@ -5,7 +5,7 @@ class Table:
     schemaName: str
     tableName: str
     columns: list
-    data: list = []
+    data: list
 
     def __init__(self, tableName) -> None:
         self.tableName = tableName
@@ -15,6 +15,8 @@ class Table:
             self.columns = CONSTS.PLAYER_COLUMNS
         elif self.schemaName == "team":
             self.columns = CONSTS.TEAM_COLUMNS
+
+        self.data = []
 
     def appendData(self, data) -> None:
         self.data += data
