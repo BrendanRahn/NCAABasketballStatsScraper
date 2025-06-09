@@ -69,8 +69,10 @@ class Parser:
         return schemaName   
 
     #reanme getUrlParams?
-    def getParamValues(self, url: str) -> list[str]:
-        return re.findall("(?<=\=)([^&]*)", url)
+    def getParamsAndValuesDict(self, url: str) -> dict[str, str]:
+        listOfParamsAndValues = re.findall("(?<=[?&])([^=&#]+)=([^&#]*)", url)
+        paramsAndValues = {param: value for param, value in listOfParamsAndValues}
+        return paramsAndValues
         
 
 

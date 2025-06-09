@@ -99,17 +99,17 @@ class Service:
         table = Table(tableName)
 
         for url in tableUrls:
-            paramValues = self.parser.getParamValues(url)
-            if len(paramValues) > 1:
-                #cast website year id to actual year
-                paramValues[-1] = CONSTS.SEASON_IDS_TO_YEARS[paramValues[-1]]
+            paramsAndValues = self.parser.getParamsAndValuesDict(url)
+            if len(paramsAndValues) > 1:
+                #make new entry for year, from season_id
+                paramsAndValues["year"] = CONSTS.SEASON_IDS_TO_YEARS[paramsAndValues["season_id"]]
 
             # sleep for 1s to avoid (potentially?) getting ip blocked
-            print(f'getting data for {table.tableName} + {paramValues}')
+            print(f'getting data for {table.tableName} + {paramsAndValues["year"]}')
             time.sleep(1)
             html = self.getPageHtmlAsString(url)
             
-            data = [row + paramValues for row in self.parser.getData(html)]
+            data = [row.append(paramsAndValues["year"]) for row in self.parser.getData(html)]
             table.appendData(data)
 
 

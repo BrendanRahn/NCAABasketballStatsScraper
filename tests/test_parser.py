@@ -13,8 +13,12 @@ def test_getData_returnsData(parser, mockHtml):
 
 def test_getParamValues_returnsParamValues(parser):
     url = 'https://example.com/page?param1=value1&param2=value2&param3=value3'
-    res = parser.getParamValues(url)
-    assert res == ['value1', 'value2', 'value3']
+    res = parser.getParamsAndValuesDict(url)
+    assert res == {
+        'param1': 'value1',
+        'param2': 'value2',
+        'param3': 'value3'
+    }
 
 def test_getPlayerSchemaName_returnsPlayerSchemaName(parser):
     url = 'https://example.com/player-stat/page?param1=value1&param2=value2&param3=value3'
