@@ -32,14 +32,16 @@ loadUrlsTable =  '''
 createTeamStatTeamTable =  '''
                             CREATE TABLE IF NOT EXISTS {tableName}
                             (
-                                team varchar(50) PRIMARY KEY, ####should be composite
                                 rank int,
+                                team varchar(50), 
                                 currentSeason int,
                                 last3 decimal,
                                 last1 decimal,
                                 home decimal,
                                 away decimal,
-                                previousSeason decimal
+                                previousSeason decimal,
+
+                                PRIMARY KEY (team, currentSeason)
 
                             )
                             '''
@@ -52,7 +54,9 @@ createTeamStatPlayerTable =  '''
                                 position varchar(5),
                                 value decimal,
                                 split varchar(50),
-                                year int
+                                year int,
+
+                                PRIMARY KEY (player, team, split, year)
                             )
                             '''
 
