@@ -127,9 +127,10 @@ class Service:
             table.columns = CONSTS.TEAM_COLUMNS
 
         for url in tableUrls:
-            paramValues = self.parser.getParamValues(url)
-            if len(paramValues) > 1:
-                paramValues[-1] = CONSTS.SEASON_IDS_TO_YEARS[paramValues[-1]]
+            paramsAndValues = self.parser.getParamsAndValuesDict(url)
+            if len(paramsAndValues) > 1:
+                #make new entry for year, from season_id
+                paramsAndValues["year"] = CONSTS.SEASON_IDS_TO_YEARS[paramsAndValues["season_id"]]
                 
             # sleep for 1s to avoid (potentially?) getting ip blocked
             print(f'getting data for {table.tableName} + {paramValues}')
@@ -152,16 +153,20 @@ class Service:
 
         if table.schemaName == "player":
             table.columns = CONSTS.PLAYER_COLUMNS
+            return Table("empty") #todo: remove this line, temporary fix for player table not being created
         elif table.schemaName == "team":
             table.columns = CONSTS.TEAM_COLUMNS
 
 
-        paramValues = self.parser.getParamValues(tableUrls[0])
-        if len(paramValues) > 1:
-            paramValues[-1] = CONSTS.SEASON_IDS_TO_YEARS[paramValues[-1]]
+        paramsAndValues = self.parser.getParamsAndValuesDict(tableUrls[0])
+        if len(paramsAndValues) > 1:
+            #make new entry for year, from season_id
+
+            #TODO: player stats have user_id, team stats have year date
+            paramsAndValues["year"] = CONSTS.SEASON_IDS_TO_YEARS[paramsAndValues["season_id"]]
             
         # sleep for 1s to avoid (potentially?) getting ip blocked
-        print(f'getting data for {table.tableName} + {paramValues}')
+        print(f'getting data for {table.tableName} + {paramsAndValues["year"]}')
         time.sleep(1)
         html = self.getPageHtmlAsString(tableUrls[0])
         
@@ -169,18 +174,28 @@ class Service:
 
         if table.schemaName == "player":
             # listData[valueColumnIndex] = parser.sanitizeNumericData(listData[valueColumnIndex])
-            listData = [self.parser.sanitizeNumericPlayerData(row) for row in listData]
+            
+            listData = self.processPlayerData(listData, paramsAndValues)
+        elif table.schemaName == "team":
+            # need to add year (example) to data row
+            listData = self.processTeamData(listData, paramsAndValues)
 
-        # need to add year (example) to data row
-        dataWithYearAppended = [row + paramValues for row in listData]
-        table.appendData(dataWithYearAppended)
-
-        
+        table.appendData(listData)      
         return table
     
 
-    def aggregatePlayerData(self, data: list[str]) -> list[str]:
-        sanitizedData = []
+    def processPlayerData(self, data: list[list[str]], urlParamValues: dict[str, str]) -> list[list[str]]:
+        sanitizedData = [self.parser.sanitizeData(row) for row in data]
+        dataWithYear = [row + [urlParamValues["year"]] for row in sanitizedData]
+        return dataWithYear
+    
+    def processTeamData(self, data: list[list[str]], urlParamValues: dict[str, str]) -> list[str]:
+        sanitizedData = [self.parser.sanitizeData(row) for row in data]
+        currentSeason
+
+        dataWithCurrentSeason = [row[:1] + [urlParamValues["year"]] + row[1:] for row in sanitizedData]
+        dataWithPreviousS
+        return dataWithCurrentSeason
     
 
 
