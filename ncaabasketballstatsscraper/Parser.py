@@ -27,12 +27,9 @@ class Parser:
             data.append(stringData)
         return data
     
-    def sanitizeNumericPlayerData(self, data: list[str]) -> list[str]:
-        valueColumnIndex = 4
-        data[valueColumnIndex] = re.sub(r'%', '', data[valueColumnIndex]) # type: ignore
-
-        return data
             
+    def sanitizeData(self, data: list[str]) -> list[str]:
+        return [re.sub(r'%', '', d) for d in data] # type: ignore
 
 
     def getTableName(self, url: str) -> str:
