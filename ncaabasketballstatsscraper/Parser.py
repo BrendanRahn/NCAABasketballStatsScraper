@@ -1,4 +1,6 @@
 import re
+import datetime
+from . import CONSTS
 from bs4 import BeautifulSoup
 class Parser:
 
@@ -56,6 +58,20 @@ class Parser:
             tableName = "team_" + tableName
         
         return tableName
+
+    '''
+    Basketball seasons are defined by the year they start.
+        If the date is in the second half of the year, the season the current year of the date.
+        If the date is in the first half of the year, the season is year before the date.
+    '''
+    def getSeasonYearFromDate(self, date: str) -> str:
+        dateObj = datetime.datetime.strptime(date, CONSTS.DATETIME_FORMAT)
+        july = 7
+        if(dateObj.month <= july):
+            season = str(dateObj.year - 1)
+        elif (dateObj.month > july):
+            season = str(dateObj.year)
+        return season
     
     def getSchemaName(self, url: str) -> str:
         if re.search("player-stat", url):
