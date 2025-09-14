@@ -1,6 +1,8 @@
 
 SEASON_IDS_TO_YEARS = {year:id for (year,id) in zip([str(i) for i in range(304,322)], [str(i) for i in range(2007,2025)])}
 
+DATETIME_FORMAT = "%Y-%m-%d"
+
 PLAYER_COLUMNS = [
             "rank",
             "player",

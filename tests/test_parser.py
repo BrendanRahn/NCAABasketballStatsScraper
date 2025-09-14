@@ -34,3 +34,13 @@ def test_getTeamSchemaName_returnsTeamSchemaName(parser):
     url = 'https://example.com/page?param1=value1&param2=value2&param3=value3'
     res = parser.getSchemaName(url)
     assert res == 'team'
+
+def test_getSeasonYearFromDate_returnsCorrectSeasonYear(parser):
+    februaryDate = '2023-02-01'
+    octoberDate = '2023-10-01'
+
+    februarySeason = parser.getSeasonYearFromDate(februaryDate)
+    octoberSeasonr = parser.getSeasonYearFromDate(octoberDate)
+
+    assert februarySeason == '2022'
+    assert octoberSeasonr == '2023'

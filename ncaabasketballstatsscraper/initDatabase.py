@@ -23,7 +23,7 @@ def createAndLoadTables(conn: psycopg2.extensions.connection):
     service = Service()
     tablesWithTheirUrls = service.getTablesAndTheirUrls()
     for tableName in tablesWithTheirUrls.keys():
-        table = service.getOneUrlDataForTable(tableName, tablesWithTheirUrls[tableName]) #todo: change back to getDataForTable
+        table = service.getDataForTable(tableName, tablesWithTheirUrls[tableName])
 
         statType = tableName.split("_")[0]
         if statType == "team":
@@ -31,6 +31,7 @@ def createAndLoadTables(conn: psycopg2.extensions.connection):
         elif statType == "player":
             createPlayerTable(conn, table)
 
+#rename, this creates table and inserts
 def createTeamTable(conn, table):
     cursor = conn.cursor()
     cursor.execute(QUERIES.createTeamStatTeamTable.format(

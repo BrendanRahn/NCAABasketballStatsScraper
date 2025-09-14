@@ -67,7 +67,6 @@ class Service:
     
     
     def getParameterizeUrls(self, urls) -> list[str]:
-        #rename - sorted how?
         sortedUrls = {
               "player-stat": [],
               "team-stat": []
@@ -100,20 +99,26 @@ class Service:
 
         for url in tableUrls:
             paramsAndValues = self.parser.getParamsAndValuesDict(url)
-            if len(paramsAndValues) > 1:
+            paramsContainsSeasonId = len(paramsAndValues) > 1
+            if (paramsContainsSeasonId):
                 #make new entry for year, from season_id
                 paramsAndValues["year"] = CONSTS.SEASON_IDS_TO_YEARS[paramsAndValues["season_id"]]
 
             # sleep for 1s to avoid (potentially?) getting ip blocked
-            print(f'getting data for {table.tableName} + {paramsAndValues["year"]}')
+            print(f'getting data for {table.tableName} + {paramsAndValues["date"] if table.schemaName == "team" else paramsAndValues["year"] + paramsAndValues["split"]}')
             time.sleep(1)
             html = self.getPageHtmlAsString(url)
-            
-            data = [row.append(paramsAndValues["year"]) for row in self.parser.getData(html)]
-            table.appendData(data)
 
+            listData = self.parser.getData(html)
 
+            if table.schemaName == "player":            
+                listData = self.processPlayerData(listData, paramsAndValues)
+            elif table.schemaName == "team":
+                listData = self.processTeamData(listData, paramsAndValues)
+
+            table.appendData(listData)      
         return table
+
             
     #temporary
     def getOneTable(self, tableName: str, tableUrls: list[str]) -> Table:
@@ -153,20 +158,21 @@ class Service:
 
         if table.schemaName == "player":
             table.columns = CONSTS.PLAYER_COLUMNS
-            return Table("empty") #todo: remove this line, temporary fix for player table not being created
+            #return Table("empty") #todo: remove this line, temporary fix for player table not being created
         elif table.schemaName == "team":
             table.columns = CONSTS.TEAM_COLUMNS
 
 
         paramsAndValues = self.parser.getParamsAndValuesDict(tableUrls[0])
-        if len(paramsAndValues) > 1:
+        paramsContainsSeasonId = len(paramsAndValues) > 1 # not sure if this works //use dict.keys().contains?
+        if (paramsContainsSeasonId):
             #make new entry for year, from season_id
 
             #TODO: player stats have user_id, team stats have year date
             paramsAndValues["year"] = CONSTS.SEASON_IDS_TO_YEARS[paramsAndValues["season_id"]]
             
+        print(f'getting data for {table.tableName} + {paramsAndValues["date"] if table.schemaName == "team" else paramsAndValues["year"]}')
         # sleep for 1s to avoid (potentially?) getting ip blocked
-        print(f'getting data for {table.tableName} + {paramsAndValues["year"]}')
         time.sleep(1)
         html = self.getPageHtmlAsString(tableUrls[0])
         
@@ -186,16 +192,27 @@ class Service:
 
     def processPlayerData(self, data: list[list[str]], urlParamValues: dict[str, str]) -> list[list[str]]:
         sanitizedData = [self.parser.sanitizeData(row) for row in data]
-        dataWithYear = [row + [urlParamValues["year"]] for row in sanitizedData]
+        dataWithYear = [row + [urlParamValues["split"]] + [urlParamValues["year"]] for row in sanitizedData]
         return dataWithYear
     
     def processTeamData(self, data: list[list[str]], urlParamValues: dict[str, str]) -> list[str]:
         sanitizedData = [self.parser.sanitizeData(row) for row in data]
-        currentSeason
 
-        dataWithCurrentSeason = [row[:1] + [urlParamValues["year"]] + row[1:] for row in sanitizedData]
-        dataWithPreviousS
-        return dataWithCurrentSeason
+        def castToFloats(decimalValue: str) -> float:
+            if(decimalValue == "--"):
+                return None
+            else:
+                try:
+                    return float(decimalValue)
+                except:
+                    return decimalValue
+        sanitizedData = [row[:2] + [castToFloats(x) for x in row[2:]] for row in sanitizedData]
+        seasonStartYear = self.parser.getSeasonYearFromDate(urlParamValues["date"])
+
+
+        #add current season and previous season values 
+        dataWithSeasonStart = [row[:2] + [seasonStartYear] + row[2:] for row in sanitizedData] 
+        return dataWithSeasonStart
     
 
 
