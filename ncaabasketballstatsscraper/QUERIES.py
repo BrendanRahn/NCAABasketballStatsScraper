@@ -34,7 +34,7 @@ createTeamStatTeamTable =  '''
                             (
                                 rank int,
                                 team varchar(50), 
-                                seasonStartYear int,
+                                seasonDate date,
                                 currentSeason int,
                                 last3 decimal,
                                 last1 decimal,
@@ -42,7 +42,7 @@ createTeamStatTeamTable =  '''
                                 away decimal,
                                 previousSeason decimal,
 
-                                PRIMARY KEY (team, seasonStartYear)
+                                PRIMARY KEY (team, seasonDate)
 
                             )
                             '''
@@ -62,7 +62,7 @@ createTeamStatPlayerTable =  '''
                             '''
 
 insertTeamStats = '''
-                INSERT INTO {tableName} (rank, team, seasonStartYear, currentSeason, last3, last1, home, away, previousSeason)
+                INSERT INTO {tableName} (rank, team, seasonDate, currentSeason, last3, last1, home, away, previousSeason)
                 VALUES %s
                 '''
 

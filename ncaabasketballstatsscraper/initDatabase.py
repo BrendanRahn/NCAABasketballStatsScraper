@@ -21,7 +21,7 @@ def createUrlsTable(cursor):
 def createAndLoadTables(conn: psycopg2.extensions.connection):
     
     service = Service()
-    tablesWithTheirUrls = service.getTablesAndTheirUrls()
+    tablesWithTheirUrls = service.getUrlsForTables()
     for tableName in tablesWithTheirUrls.keys():
         table = service.getDataForTable(tableName, tablesWithTheirUrls[tableName])
 

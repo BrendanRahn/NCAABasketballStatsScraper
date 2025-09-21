@@ -3,6 +3,7 @@ from .Table import Table
 from . import CONSTS
 from bs4 import BeautifulSoup
 from collections import defaultdict
+from datetime import datetime
 import requests
 import time
 import re
@@ -83,9 +84,10 @@ class Service:
                 self.addDatesToTeamUrls(sortedUrls["team-stat"], self.DATES)
                 )
     
-    def getTablesAndTheirUrls(self) -> dict:
+    def getUrlsForTables(self) -> dict[str, list[str]]:
         urlsByTable = defaultdict(list)
         parameterizedUrls = self.getParameterizeUrls(self.URLS)
+        #paramerterizedUrls = is a list of len 10368, maybe to the parameter concat inline
         for url in parameterizedUrls:
             tableName = self.parser.getTableName(url)
             urlsByTable[tableName].append(url)
@@ -105,7 +107,7 @@ class Service:
                 paramsAndValues["year"] = CONSTS.SEASON_IDS_TO_YEARS[paramsAndValues["season_id"]]
 
             # sleep for 1s to avoid (potentially?) getting ip blocked
-            print(f'getting data for {table.tableName} + {paramsAndValues["date"] if table.schemaName == "team" else paramsAndValues["year"] + paramsAndValues["split"]}')
+            print(f'getting data for {table.tableName} + {paramsAndValues["date"] if table.schemaName == "team" else paramsAndValues["year"] + " " + paramsAndValues["split"]}')
             time.sleep(1)
             html = self.getPageHtmlAsString(url)
 
@@ -207,11 +209,11 @@ class Service:
                 except:
                     return decimalValue
         sanitizedData = [row[:2] + [castToFloats(x) for x in row[2:]] for row in sanitizedData]
-        seasonStartYear = self.parser.getSeasonYearFromDate(urlParamValues["date"])
+        seasonDate = datetime.strptime(urlParamValues["date"], "%Y-%m-%d").date()
 
 
         #add current season and previous season values 
-        dataWithSeasonStart = [row[:2] + [seasonStartYear] + row[2:] for row in sanitizedData] 
+        dataWithSeasonStart = [row[:2] + [seasonDate] + row[2:] for row in sanitizedData] 
         return dataWithSeasonStart
     
 

@@ -64,6 +64,7 @@ class Parser:
         If the date is in the second half of the year, the season the current year of the date.
         If the date is in the first half of the year, the season is year before the date.
     '''
+    #deprecated?
     def getSeasonYearFromDate(self, date: str) -> str:
         dateObj = datetime.datetime.strptime(date, CONSTS.DATETIME_FORMAT)
         july = 7
