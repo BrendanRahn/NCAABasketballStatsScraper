@@ -24,3 +24,4 @@ A .env file with the following variables is required to initalize and connect to
 - Then run 'poetry init_db'
 
 
+TODO: add test case for null/"--" values
