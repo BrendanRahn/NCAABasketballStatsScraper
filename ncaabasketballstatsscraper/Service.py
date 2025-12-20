@@ -194,21 +194,16 @@ class Service:
 
     def processPlayerData(self, data: list[list[str]], urlParamValues: dict[str, str]) -> list[list[str]]:
         sanitizedData = [self.parser.sanitizeData(row) for row in data]
-        dataWithYear = [row + [urlParamValues["split"]] + [urlParamValues["year"]] for row in sanitizedData]
-        return dataWithYear
+        sanitizedData = [row[:4] + [self.castToFloat(row[4])] + row[5:] for row in sanitizedData] #this should probably go in sanitize data function
+        decimalVals = [row[3] for row in sanitizedData]
+
+        dataWithSplitAndYear = [row + [urlParamValues["split"]] + [urlParamValues["year"]] for row in sanitizedData]
+        return dataWithSplitAndYear
     
     def processTeamData(self, data: list[list[str]], urlParamValues: dict[str, str]) -> list[str]:
         sanitizedData = [self.parser.sanitizeData(row) for row in data]
 
-        def castToFloats(decimalValue: str) -> float:
-            if(decimalValue == "--"):
-                return None
-            else:
-                try:
-                    return float(decimalValue)
-                except:
-                    return decimalValue
-        sanitizedData = [row[:2] + [castToFloats(x) for x in row[2:]] for row in sanitizedData]
+        sanitizedData = [row[:2] + [self.castToFloat(x) for x in row[2:]] for row in sanitizedData]
         seasonDate = datetime.strptime(urlParamValues["date"], "%Y-%m-%d").date()
 
 
@@ -216,7 +211,14 @@ class Service:
         dataWithSeasonStart = [row[:2] + [seasonDate] + row[2:] for row in sanitizedData] 
         return dataWithSeasonStart
     
-
+    def castToFloat(self, decimalValue: str) -> float:
+            if(decimalValue == "--"):
+                return None
+            else:
+                try:
+                    return float(decimalValue)
+                except:
+                    return decimalValue
 
 
 
