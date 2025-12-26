@@ -192,7 +192,7 @@ class Service:
         return table
     
 
-    def processPlayerData(self, data: list[list[str]], urlParamValues: dict[str, str]) -> list[list[str]]:
+    def processPlayerData(self, data: list[list[str]], urlParamValues: dict[str, str]) -> list[list[str]]: #TODO: enable type checking, the inner list[str] should be its own dto type
         sanitizedData = [self.parser.sanitizeData(row) for row in data]
         sanitizedData = [row[:4] + [self.castToFloat(row[4])] + row[5:] for row in sanitizedData] #this should probably go in sanitize data function
         decimalVals = [row[3] for row in sanitizedData]
@@ -211,7 +211,7 @@ class Service:
         dataWithSeasonStart = [row[:2] + [seasonDate] + row[2:] for row in sanitizedData] 
         return dataWithSeasonStart
     
-    def castToFloat(self, decimalValue: str) -> float:
+    def castToFloat(self, decimalValue: str) -> float | None:
             if(decimalValue == "--"):
                 return None
             else:

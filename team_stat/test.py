@@ -1,5 +1,5 @@
-from ncaabasketballstatsscraper.Service import Service
-from ncaabasketballstatsscraper.Parser import Parser
+from team_stat.Service import Service
+from team_stat.Parser import Parser
 from collections import defaultdict
 
 service = Service()

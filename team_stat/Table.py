@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from ncaabasketballstatsscraper import CONSTS
+from team_stat import CONSTS
 
 class Table:
     schemaName: str

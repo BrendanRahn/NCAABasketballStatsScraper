@@ -2,7 +2,7 @@ import pytest
 import sys
 import os
 sys.path.append("..")
-from ncaabasketballstatsscraper.Parser import Parser
+from team_stat.Parser import Parser
 
 @pytest.fixture()
 def mockHtml():

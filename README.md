@@ -24,4 +24,6 @@ A .env file with the following variables is required to initalize and connect to
 - Then run 'poetry init_db'
 
 
-TODO: add test case for null/"--" values
+TODO: 
+- add test case for null/"--" values
+- Move initDatabase.py to outer folder to init for both packages (teamStat and StatHead)
