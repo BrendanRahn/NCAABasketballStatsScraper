@@ -33,13 +33,13 @@ def createAndLoadTables(conn: psycopg.Connection):
 def createTeamTable(conn, table):
     cursor = conn.cursor()
     cursor.execute(QUERIES.createTeamStatTeamTable.format(
-        tableName=(table.tableName)
+        tableName=table.tableName
     ))
     conn.commit()
 
     cursor.executemany(
         QUERIES.insertTeamStats.format(
-            tableName=(table.tableName)),
+            tableName=table.tableName),
         table.data
     )
     conn.commit()
@@ -47,20 +47,20 @@ def createTeamTable(conn, table):
 def createPlayerTable(conn, table):
     cursor = conn.cursor()
     cursor.execute(QUERIES.createTeamStatPlayerTable.format(
-        tableName=(table.tableName)
+        tableName=table.tableName
     ))
     conn.commit()
 
     cursor.executemany(
         QUERIES.insertPlayerStats.format(
-            tableName=(table.tableName)),
+            tableName=table.tableName),
         table.data
     )
     conn.commit()
   
 
 def createNcaaBasketballDatabase():
-    default_conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("STATHEAD_TEST_DB")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
+    default_conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("DEFAULT_DB")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
     default_conn = psycopg.connect(default_conn_string)
     cur = default_conn.cursor()
 
@@ -88,12 +88,52 @@ def createSchemas(conn):
     ))
     conn.commit()
 
+#temp
+def testLoadOneTable():
+    dotenv.load_dotenv()
+    conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("STATHEAD_TEST_DB")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
+    conn = psycopg.connect(conn_string)
+
+    cur = conn.cursor()
+
+    service = Service()
+    tables = service.getUrlsForTables()
+    tableName = "team_block_pct"
+    tableUrls= tables[tableName]
+
+    tableData = service.getOneUrlDataForTable(tableName, tableUrls)
+    tableName = tableData.tableName
+
+    cur.execute(QUERIES.createTeamStatTeamTable.format(
+        tableName=tableName
+    ))
+    
+
+    cur.executemany(
+        QUERIES.insertTeamStats.format(
+            tableName=tableName),
+        tableData.data
+    )
+
+    # psycopg2.extras.execute_values(
+    #     cur,
+    #     QUERIES.insertPlayerStats.format(
+    #         tableName=sql.Identifier(tableName).string),
+    #     tableData.data,
+    #     page_size=1000,
+
+    # )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
 def main():
     dotenv.load_dotenv()
 
-    createNcaaBasketballDatabase()
+    createNcaaBasketballDatabase() #TODO: this has a separate connection, I think the connection has to be closed when creating database, maybe separate out better
 
-    conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("STATHEAD_TEST_DB")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
+    conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("DB_NAME")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
     conn = psycopg.connect(conn_string)
 
     createSchemas(conn)

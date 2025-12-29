@@ -63,11 +63,11 @@ createTeamStatPlayerTable =  '''
 
 insertTeamStats = '''
                 INSERT INTO {tableName} (rank, team, seasonDate, currentSeason, last3, last1, home, away, previousSeason)
-                VALUES %s
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 '''
 
 insertPlayerStats = '''
                 INSERT INTO {tableName} (rank, player, team, position, value, split, year)
-                VALUES %s
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 '''
     
