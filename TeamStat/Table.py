@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from team_stat import CONSTS
+from TeamStat import CONSTS
 
 class Table:
     schemaName: str

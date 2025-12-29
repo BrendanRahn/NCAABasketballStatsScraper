@@ -1,5 +1,5 @@
 import dotenv
-import psycopg2
+import psycopg
 import os
 from . import QUERIES
 
@@ -10,12 +10,11 @@ class DatabaseHelper:
 
     # __del__ function to close db connection?
 
-    def getDatabaseConnection(self) -> psycopg2.extensions.connection:
+    def getDatabaseConnection(self) -> psycopg.Connection:
         dotenv.load_dotenv()
 
         conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("STATHEAD_TEST_DB")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
-        conn = psycopg2.connect(conn_string)
-
+        conn = psycopg.connect(conn_string)
         return conn
 
     #TODO: thinking about initalizing entire db at root level, and onyl handling inserts at sublevels

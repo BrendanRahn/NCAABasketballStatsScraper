@@ -1,7 +1,7 @@
-from team_stat import initDatabase
+from TeamStat import initDatabase
 from tests import conftest
-from stat_head import service
-from stat_head import databaseHelper
+from StatHead import service
+from StatHead import databaseHelper
 
 # initDatabase.main()
 service = service.Service()
