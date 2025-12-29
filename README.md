@@ -27,3 +27,6 @@ A .env file with the following variables is required to initalize and connect to
 TODO: 
 - add test case for null/"--" values
 - Move initDatabase.py to outer folder to init for both packages (teamStat and StatHead)
+- Drop schemas? (Don't really think they are neccessary)
+- Fix casing across the project(pascal case?)
+- CurrentSeason values are getting trimmed for team tabels (no decimal places)
