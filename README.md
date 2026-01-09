@@ -28,5 +28,6 @@ TODO:
 - add test case for null/"--" values
 - Move initDatabase.py to outer folder to init for both packages (teamStat and StatHead)
 - Drop schemas? (Don't really think they are neccessary)
-- Fix casing across the project(pascal case?)
+- Fix casing across the project(lower snake case)
 - CurrentSeason values are getting trimmed for team tabels (no decimal places)
+- Move tests in root folder to TeamStat folder

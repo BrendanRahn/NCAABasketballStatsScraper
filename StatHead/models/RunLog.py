@@ -1,10 +1,10 @@
 from pydantic import BaseModel
+from datetime import datetime
+from uuid import UUID
 
 class RunLog(BaseModel):
-    RunLogId: int
-    StartTime: str
-    EndTime: str
-    StartTeam: str
-    StartOffset: int
-    EndTeam: str
-    EndOffset: int
+    run_log_uuid: UUID
+    status: str
+    timestamp: datetime
+    team: str
+    row_offset: int

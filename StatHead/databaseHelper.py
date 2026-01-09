@@ -1,7 +1,9 @@
 import dotenv
 import psycopg
+from psycopg.rows import class_row
 import os
 from . import QUERIES
+from .models.RunLog import RunLog
 
 class DatabaseHelper:
 
@@ -25,7 +27,7 @@ class DatabaseHelper:
         cursor.execute(query=QUERIES.createTeamsTable)
         cursor.executemany(
             query=QUERIES.loadTeamId,
-            vars_list=tableData
+            params_seq=tableData
         )
         self.connection.commit()
         cursor.close()
@@ -37,10 +39,19 @@ class DatabaseHelper:
         cursor.close()
 
     def getLatestRunLog(self):
-        cursor = self.connection.cursor()
+        cursor = self.connection.cursor(row_factory=class_row(RunLog))
         cursor.execute(query=QUERIES.getLatestRunLog)
         result = cursor.fetchone()
         cursor.close()
         return result
+    
+    def insertRunLog(self, runLog: RunLog):
+        cursor = self.connection.cursor()
+        cursor.execute(
+            query=QUERIES.insertRunLog,
+            params=runLog.model_dump()
+        )
+        self.connection.commit()
+        cursor.close()
 
 

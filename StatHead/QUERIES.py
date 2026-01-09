@@ -15,19 +15,22 @@ loadTeamId = '''
 
 createRunLogTable = '''
             CREATE TABLE IF NOT EXISTS run_log (
-                run_log_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                start_time TIMESTAMP WITH TIME ZONE,
-                end_time TIMESTAMP WITH TIME ZONE,
-                start_team VARCHAR(50),
-                start_offset INT,
-                end_team VARCHAR(50),
-                end_offset INT
+                run_log_uuid UUID,
+                status VARCHAR(50),
+                timestamp TIMESTAMP WITH TIME ZONE,
+                team VARCHAR(50),
+                row_offset INT
                 );
             '''
 
 getLatestRunLog = '''
                 SELECT * 
                 FROM run_log
-                ORDER BY run_log_id DESC
+                ORDER BY timestamp DESC
                 LIMIT 1;
+            '''
+
+insertRunLog = '''
+            INSERT INTO run_log (run_log_uuid, status, timestamp, team, row_offset)
+            VALUES (%(run_log_uuid)s, %(status)s, %(timestamp)s, %(team)s, %(row_offset)s);
             '''
