@@ -4,6 +4,7 @@ from psycopg.rows import class_row
 import os
 from . import QUERIES
 from .models.RunLog import RunLog
+from .models.GameMatchupData import GameMatchupData
 
 class DatabaseHelper:
 
@@ -38,6 +39,12 @@ class DatabaseHelper:
         self.connection.commit()
         cursor.close()
 
+    def createGameMatchupDataTable(self):
+        cursor = self.connection.cursor()
+        cursor.execute(query=QUERIES.createGameMatchupDataTable)
+        self.connection.commit()
+        cursor.close()
+
     def getLatestRunLog(self):
         cursor = self.connection.cursor(row_factory=class_row(RunLog))
         cursor.execute(query=QUERIES.getLatestRunLog)
@@ -50,6 +57,16 @@ class DatabaseHelper:
         cursor.execute(
             query=QUERIES.insertRunLog,
             params=runLog.model_dump()
+        )
+        self.connection.commit()
+        cursor.close()
+
+    #TODO: create test case to validate all 200 rows inserted correctly
+    def insertGameMatchupData(self, gameMatchupData: list[GameMatchupData]):
+        cursor = self.connection.cursor()
+        cursor.executemany(
+            query=QUERIES.insertGameMatchupData,
+            params_seq=[game.model_dump() for game in gameMatchupData]
         )
         self.connection.commit()
         cursor.close()

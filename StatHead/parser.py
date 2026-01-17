@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from .models.GameMatchupData import GameMatchupData
 from .models.GameResult import GameResult
+import re
 
 class Parser:
     def parseTeamData(self, html: str) -> list[str]:
@@ -30,14 +31,15 @@ class Parser:
                 statValue = cell.text.strip()
                 statsDict[statName] = statValue
 
+            gameDate = self.getDateFromTableValue(statsDict.get("date", None))
             gameLocation = self.getGameLocationFromTableValue(statsDict.get("game_location", ""))
             gameResult = self.getGameResultFromTableValue(statsDict.get("game_result", None))
 
             gameMatchupData = GameMatchupData(
-                team_name_abbr=statsDict.get("team_name_abbr", None),
-                date=statsDict.get("date", None),
+                team_name=statsDict.get("team_name_abbr", None),
+                date=gameDate,
                 game_location=gameLocation,
-                opp_name_abbr=statsDict.get("opp_name_abbr", None),
+                opp_name=statsDict.get("opp_name_abbr", None),
                 team_score=gameResult.team_score,
                 opp_score=gameResult.opp_score,
                 result=gameResult.result,
@@ -81,9 +83,7 @@ class Parser:
                     try:
                         overtime = int(ot_str[:-2])
                     except Exception:
-                        overtime = 1
-                else:
-                    overtime = 1
+                        overtime = 0
             else:
                 score_part = score_and_ot.strip()
             team_score_str, opp_score_str = score_part.split('-')
@@ -97,7 +97,15 @@ class Parser:
             result=result_char,
             overtime=overtime
         )
-        
+    
+    def getDateFromTableValue(self, tableValue: str) -> str:
+        if tableValue is None:
+            raise ValueError("gameDate table value cannot be None")
+        else:
+            filteredDate = re.sub(r"[^0-9-]", "", tableValue)
+            return filteredDate
+            
+
     def hasReachedEndOfOffset(self, soup: BeautifulSoup) -> bool:
         noDataPtag = soup.find("p", string="Sorry, there are no results for your search.")
         return noDataPtag is not None

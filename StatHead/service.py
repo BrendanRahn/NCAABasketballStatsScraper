@@ -5,6 +5,7 @@ from .parser import Parser
 from .databaseHelper import DatabaseHelper
 from .models.RunLog import RunLog
 from datetime import datetime
+import time
 
 
 class Service:
@@ -55,26 +56,55 @@ class Service:
         return url
 
     def startRun(self):
+
         latestRunLog = self.dbHelper.getLatestRunLog()
         self.createNewRunLog(latestRunLog)
 
-        team = latestRunLog.team if latestRunLog else self.teams[0]
-        offset = latestRunLog.row_offset if latestRunLog else 0
+        startTeam = latestRunLog.team if latestRunLog else self.teams[0]
 
-        for t in self.teams[self.teams.index(team):]:
-            current_offset = offset if t == team else 0
-            while True:
-                url = self.buildUrl(t, current_offset)
-                pageHtmlString = self.sessionHelper.getPageHtmlAsString(url)
-                listOfGameMatchupData = self.parser.parseStatPageHtmlString(pageHtmlString)
+        startOffset = (latestRunLog.row_offset + 200) if latestRunLog else 0
 
-                if not listOfGameMatchupData:
-                    break #error?
+        try:
+            for team in self.teams[self.teams.index(startTeam):]:
+                offset = startOffset if team == startTeam else 0
+                while True:
+                    url = self.buildUrl(team, offset)
+                    pageHtmlString = self.sessionHelper.getPageHtmlAsString(url)
+                    listOfGameMatchupData = self.parser.parseStatPageHtmlString(pageHtmlString)
 
+                    print(f"Processing team {team} at offset {offset} with {len(listOfGameMatchupData)} games.")
+                    if len(listOfGameMatchupData) == 0:
+                        break #start next team
 
-                current_offset += 200 
+                    #process and store data
+                    try:
+                        self.dbHelper.insertGameMatchupData(listOfGameMatchupData)
+                    except Exception as e:
+                        print(f"Error inserting game matchup data for team {team} at offset {offset}: {e}")
+                        errorRunLog = RunLog(
+                            run_log_uuid=self.runUUID,
+                            status='ERROR',
+                            timestamp=datetime.now(),
+                            team=team,
+                            row_offset=offset
+                        )
+                        self.dbHelper.insertRunLog(errorRunLog)
+                        raise e
 
+                    offset += 200
+                    time.sleep(7) #to avoid ip blocking, rate limit is 10 requests per second
+        except KeyboardInterrupt:
+            #save run log
+            endRunLog = RunLog(
+                run_log_uuid=self.runUUID,
+                status='END',
+                timestamp=datetime.now(),
+                team=team,
+                row_offset=offset
+            )
 
+            self.dbHelper.insertRunLog(endRunLog)
+            print("Run interrupted by user. Progress saved.")
 
         
         
@@ -84,6 +114,7 @@ class Service:
         dbHelper = DatabaseHelper()
         dbHelper.createAndLoadTeamIdTable(teams)
         dbHelper.createRunLogTable()
+        dbHelper.createGameMatchupDataTable()
         
 
 
