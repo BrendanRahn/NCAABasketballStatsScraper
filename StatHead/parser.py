@@ -40,10 +40,10 @@ class Parser:
                 date=gameDate,
                 game_location=gameLocation,
                 opp_name=statsDict.get("opp_name_abbr", None),
-                team_score=gameResult.team_score,
-                opp_score=gameResult.opp_score,
-                result=gameResult.result,
-                overtime=gameResult.overtime
+                team_score=gameResult.team_score if gameResult else None,
+                opp_score=gameResult.opp_score if gameResult else None,
+                result=gameResult.result if gameResult else None,
+                overtime=gameResult.overtime if gameResult else None
             )
 
             gameMatchupDataList.append(gameMatchupData)
@@ -58,11 +58,15 @@ class Parser:
         else:
             return "HOME"
         
-    def getGameResultFromTableValue(self, tableValue: str) -> GameResult:
+    def getGameResultFromTableValue(self, tableValue: str) -> GameResult | None:
         
         #Copilot generated, surely it will work first try
         if tableValue is None:
             raise ValueError("gameResult table value cannot be None")
+
+        #scores are not entered for some records (?)
+        if len(tableValue) == 0:
+            return None
 
         if not tableValue or len(tableValue) < 5:
             raise ValueError("tableValue must be in the format 'W 100-99' or 'L 85-90'")

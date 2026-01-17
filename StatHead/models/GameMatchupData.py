@@ -6,7 +6,7 @@ class GameMatchupData(BaseModel):
     date: datetime
     game_location: str
     opp_name: str
-    team_score: int
-    opp_score: int
-    result: str
-    overtime: int
+    team_score: int | None
+    opp_score: int | None
+    result: str | None
+    overtime: int | None
