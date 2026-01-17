@@ -112,6 +112,7 @@ class Service:
     def init_db(self):
         teams = self.getAllTeams()
         dbHelper = DatabaseHelper()
+        dbHelper.createStatheadSchema()
         dbHelper.createAndLoadTeamIdTable(teams)
         dbHelper.createRunLogTable()
         dbHelper.createGameMatchupDataTable()

@@ -13,14 +13,21 @@ class DatabaseHelper:
 
     # __del__ function to close db connection?
 
+
     def getDatabaseConnection(self) -> psycopg.Connection:
         dotenv.load_dotenv()
 
-        conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("STATHEAD_TEST_DB")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
+        conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("DB_NAME")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
         conn = psycopg.connect(conn_string)
         return conn
 
     #TODO: thinking about initalizing entire db at root level, and onyl handling inserts at sublevels
+    def createStatheadSchema(self):
+        cursor = self.connection.cursor()
+        cursor.execute(query=QUERIES.createStatheadScheama)
+        self.connection.commit()
+        cursor.close()
+        
     def createAndLoadTeamIdTable(self, teamIds: list[str]):
         cursor = self.connection.cursor()
         tableData = [(teamId,) for teamId in teamIds]
