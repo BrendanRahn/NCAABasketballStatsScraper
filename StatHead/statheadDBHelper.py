@@ -2,7 +2,7 @@ import dotenv
 import psycopg
 from psycopg.rows import class_row
 import os
-from . import QUERIES
+from . import statheadQUERIES
 from .models.RunLog import RunLog
 from .models.GameMatchupData import GameMatchupData
 
@@ -21,20 +21,13 @@ class DatabaseHelper:
         conn = psycopg.connect(conn_string)
         return conn
 
-    #TODO: thinking about initalizing entire db at root level, and onyl handling inserts at sublevels
-    def createStatheadSchema(self):
-        cursor = self.connection.cursor()
-        cursor.execute(query=QUERIES.createStatheadScheama)
-        self.connection.commit()
-        cursor.close()
-        
     def createAndLoadTeamIdTable(self, teamIds: list[str]):
         cursor = self.connection.cursor()
         tableData = [(teamId,) for teamId in teamIds]
 
-        cursor.execute(query=QUERIES.createTeamsTable)
+        cursor.execute(query=statheadQUERIES.createTeamsTable)
         cursor.executemany(
-            query=QUERIES.loadTeamId,
+            query=statheadQUERIES.loadTeamId,
             params_seq=tableData
         )
         self.connection.commit()
@@ -42,19 +35,19 @@ class DatabaseHelper:
 
     def createRunLogTable(self):
         cursor = self.connection.cursor()
-        cursor.execute(query=QUERIES.createRunLogTable)
+        cursor.execute(query=statheadQUERIES.createRunLogTable)
         self.connection.commit()
         cursor.close()
 
     def createGameMatchupDataTable(self):
         cursor = self.connection.cursor()
-        cursor.execute(query=QUERIES.createGameMatchupDataTable)
+        cursor.execute(query=statheadQUERIES.createGameMatchupDataTable)
         self.connection.commit()
         cursor.close()
 
     def getLatestRunLog(self):
         cursor = self.connection.cursor(row_factory=class_row(RunLog))
-        cursor.execute(query=QUERIES.getLatestRunLog)
+        cursor.execute(query=statheadQUERIES.getLatestRunLog)
         result = cursor.fetchone()
         cursor.close()
         return result
@@ -62,7 +55,7 @@ class DatabaseHelper:
     def insertRunLog(self, runLog: RunLog):
         cursor = self.connection.cursor()
         cursor.execute(
-            query=QUERIES.insertRunLog,
+            query=statheadQUERIES.insertRunLog,
             params=runLog.model_dump()
         )
         self.connection.commit()
@@ -72,7 +65,7 @@ class DatabaseHelper:
     def insertGameMatchupData(self, gameMatchupData: list[GameMatchupData]):
         cursor = self.connection.cursor()
         cursor.executemany(
-            query=QUERIES.insertGameMatchupData,
+            query=statheadQUERIES.insertGameMatchupData,
             params_seq=[game.model_dump() for game in gameMatchupData]
         )
         self.connection.commit()

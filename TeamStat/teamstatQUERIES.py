@@ -1,20 +1,4 @@
 # identifiers must be in string.format() form due to psycopg2 string format quirks
-checkDatabaseExists = '''
-                        SELECT EXISTS
-                        (
-                            SELECT 1 FROM pg_catalog.pg_database 
-                            WHERE datname = '{database}'
-                        )
-                        '''
-
-createDatabase = '''
-                CREATE DATABASE {database}
-                '''
-
-createSchema =  '''
-                CREATE SCHEMA IF NOT EXISTS {schema}
-                '''
-
 createUrlsTable =  '''
                         CREATE TABLE IF NOT EXISTS urls 
                         (
@@ -30,7 +14,7 @@ loadUrlsTable =  '''
                 '''
                        
 createTeamStatTeamTable =  '''
-                            CREATE TABLE IF NOT EXISTS {tableName}
+                            CREATE TABLE IF NOT EXISTS {schema}.{tableName}
                             (
                                 rank int,
                                 team varchar(50), 
@@ -47,7 +31,7 @@ createTeamStatTeamTable =  '''
                             )
                             '''
 createTeamStatPlayerTable =  '''
-                            CREATE TABLE IF NOT EXISTS {tableName}
+                            CREATE TABLE IF NOT EXISTS {schema}.{tableName}
                             (
                                 rank int,
                                 player varchar(50),
@@ -62,12 +46,12 @@ createTeamStatPlayerTable =  '''
                             '''
 
 insertTeamStats = '''
-                INSERT INTO {tableName} (rank, team, seasonDate, currentSeason, last3, last1, home, away, previousSeason)
+                INSERT INTO {schema}.{tableName} (rank, team, seasonDate, currentSeason, last3, last1, home, away, previousSeason)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 '''
 
 insertPlayerStats = '''
-                INSERT INTO {tableName} (rank, player, team, position, value, split, year)
+                INSERT INTO {schema}.{tableName} (rank, player, team, position, value, split, year)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 '''
     

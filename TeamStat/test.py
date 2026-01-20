@@ -1,4 +1,4 @@
-from TeamStat.Service import Service
+from TeamStat.teamstatService import Service
 from TeamStat.Parser import Parser
 from collections import defaultdict
 

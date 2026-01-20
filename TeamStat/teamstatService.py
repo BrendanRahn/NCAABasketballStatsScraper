@@ -40,21 +40,6 @@ class Service:
          res = requests.get(url).content.decode()
          return res
     
-         
-    def writeUrlsToFile(self) -> None:
-        with open("statsURLs.txt", "w") as f:
-            for url in self.URLS:
-                    f.write(url +  "\n")
-        f.close()
-
-    # Obsolete?
-    def getTableNames(self) -> list[str]:
-        
-        tableNames = []
-        for url in self.URLS:
-            tableNames.append(self.parser.getTableName(url))
-        return tableNames
-    
     def addSplitsToPlayerUrls(self, urls, splits):
         return [url + "?split=" + split + "&season_id=" + seasonId + "&"
                 for url in urls

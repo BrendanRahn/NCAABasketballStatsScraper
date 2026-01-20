@@ -1,9 +1,5 @@
 # identifiers must be in string.format() form due to psycopg2 string format quirks
 
-createStatheadScheama = '''
-            CREATE SCHEMA IF NOT EXISTS stathead;
-        '''
-
 createTeamsTable = '''
             CREATE TABLE IF NOT EXISTS stathead.team_id (
                 id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

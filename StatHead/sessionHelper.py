@@ -24,6 +24,9 @@ class SessionHelper:
         else:
             return session
         
+    def reAuthenticateSession(self) -> None:
+        self.SESSION = self.loginAndGetSession()
+        
     def getAllTeams(self) -> list[str]:
         teams_url = "https://www.sports-reference.com/stathead/basketball/cbb/team-game-finder.cgi"
         res = self.SESSION.get(teams_url).content.decode()

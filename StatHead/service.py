@@ -2,10 +2,11 @@ import requests
 from uuid import UUID, uuid4
 from .sessionHelper import SessionHelper
 from .parser import Parser
-from .databaseHelper import DatabaseHelper
+from .statheadDBHelper import DatabaseHelper
 from .models.RunLog import RunLog
 from datetime import datetime
 import time
+import jwt
 
 
 class Service:
@@ -56,7 +57,6 @@ class Service:
         return url
 
     def startRun(self):
-
         latestRunLog = self.dbHelper.getLatestRunLog()
         self.createNewRunLog(latestRunLog)
 
@@ -92,7 +92,14 @@ class Service:
                         raise e
 
                     offset += 200
+
+                    isTokenExpired = self.isSessionTokenExpired()
+                    if isTokenExpired:
+                        print("Session token expired. Re-authenticating...")
+                        self.sessionHelper.reAuthenticateSession()
+                        
                     time.sleep(7) #to avoid ip blocking, rate limit is 10 requests per second
+
         except KeyboardInterrupt:
             #save run log
             endRunLog = RunLog(
@@ -106,13 +113,16 @@ class Service:
             self.dbHelper.insertRunLog(endRunLog)
             print("Run interrupted by user. Progress saved.")
 
-        
-        
+    def isSessionTokenExpired(self) -> bool:
+        token = self.sessionHelper.SESSION.cookies.get("access_token")
+        decoded_token = jwt.decode(token, options={"verify_signature": False})
+        exp_timestamp = decoded_token.get("exp")
+        current_timestamp = int(time.time())
+        return exp_timestamp < current_timestamp
 
     def init_db(self):
         teams = self.getAllTeams()
         dbHelper = DatabaseHelper()
-        dbHelper.createStatheadSchema()
         dbHelper.createAndLoadTeamIdTable(teams)
         dbHelper.createRunLogTable()
         dbHelper.createGameMatchupDataTable()
