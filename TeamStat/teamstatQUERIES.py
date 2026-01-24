@@ -19,7 +19,7 @@ createTeamStatTeamTable =  '''
                                 rank int,
                                 team varchar(50), 
                                 seasonDate date,
-                                currentSeason int,
+                                currentSeason decimal,
                                 last3 decimal,
                                 last1 decimal,
                                 home decimal,
