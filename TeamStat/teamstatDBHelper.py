@@ -54,7 +54,7 @@ def createAndLoadPlayerTable(conn, table):
 #temp
 def testLoadOneTable():
     dotenv.load_dotenv()
-    conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("STATHEAD_TEST_DB")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
+    conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("DB_NAME")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
     conn = psycopg.connect(conn_string)
 
     cur = conn.cursor()
@@ -68,13 +68,15 @@ def testLoadOneTable():
     tableName = tableData.tableName
 
     cur.execute(teamstatQUERIES.createTeamStatTeamTable.format(
-        tableName=tableName
+        tableName=tableName,
+        schema="teamstat"
     ))
     
 
     cur.executemany(
         teamstatQUERIES.insertTeamStats.format(
-            tableName=tableName),
+            tableName=tableName,
+            schema="teamstat"),
         tableData.data
     )
 
@@ -88,7 +90,6 @@ def testLoadOneTable():
     # )
     conn.commit()
     cur.close()
-    conn.close()
 
 #TODO: change structure of this, run should be started from the service
 def main():
@@ -98,6 +99,7 @@ def main():
     conn = psycopg.connect(conn_string)
 
     createAndLoadTables(conn)
+    # testLoadOneTable()
 
     conn.commit()
     conn.close()

@@ -4,7 +4,6 @@ import os
 from dotenv import load_dotenv
 
 def createNcaaBasketballDatabase():
-    print(os.getenv("HOST_NAME"))
     default_conn_string = f'host={os.getenv("HOST_NAME")} dbname={os.getenv("DEFAULT_DB")} user={os.getenv("USER")} password={os.getenv("PASSWORD")}'
     default_conn = psycopg.connect(default_conn_string, autocommit=True)
     cur = default_conn.cursor()

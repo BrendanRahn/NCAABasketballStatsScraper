@@ -126,6 +126,11 @@ class Service:
         dbHelper.createAndLoadTeamIdTable(teams)
         dbHelper.createRunLogTable()
         dbHelper.createGameMatchupDataTable()
+
+# Top-level function for multiprocessing
+def run_stathead_service():
+    svc = Service()
+    svc.startRun()
         
 
 
