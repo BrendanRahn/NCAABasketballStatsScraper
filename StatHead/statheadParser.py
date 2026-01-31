@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
-from .models.GameMatchupData import GameMatchupData
+from .models.RegSeasonGame import RegSeasonGame
+from models.TournamentGame import TournamentGame
 from .models.GameResult import GameResult
 import re
 
@@ -11,7 +12,7 @@ class Parser:
         return teamIds
         
 
-    def parseStatPageHtmlString(self, html: str) -> list[GameMatchupData]:
+    def parseRegSeasonPageHtmlString(self, html: str) -> list[RegSeasonGame]:
         soup = BeautifulSoup(html, features="html.parser")
         tableBody = soup.find("tbody")  # type: ignore
         if tableBody is None:
@@ -23,7 +24,7 @@ class Parser:
 
         rows = tableBody.find_all("tr")  # type: ignore
 
-        gameMatchupDataList = []
+        regSeasonGameList = []
         for row in rows:
             statsDict = {}
             for cell in row.find_all(["td"]):
@@ -35,7 +36,7 @@ class Parser:
             gameLocation = self.getGameLocationFromTableValue(statsDict.get("game_location", ""))
             gameResult = self.getGameResultFromTableValue(statsDict.get("game_result", None))
 
-            gameMatchupData = GameMatchupData(
+            regSeasonGame = RegSeasonGame(
                 team_name=statsDict.get("team_name_abbr", None),
                 date=gameDate,
                 game_location=gameLocation,
@@ -46,10 +47,53 @@ class Parser:
                 overtime=gameResult.overtime if gameResult else None
             )
 
-            gameMatchupDataList.append(gameMatchupData)
+            regSeasonGameList.append(regSeasonGame)
 
-        return gameMatchupDataList
+        return regSeasonGameList
     
+    def parseTournamentPageHtmlString(self, html: str) -> list[TournamentGame]:
+        soup = BeautifulSoup(html, features="html.parser")
+        tableBody = soup.find("tbody")  # type: ignore
+        if tableBody is None:
+            endOfOffsetReached = self.hasReachedEndOfOffset(soup)
+            if endOfOffsetReached:
+                return []
+            else:
+                raise Exception("Could not find table body in HTML and end of offset not reached.")
+
+        rows = tableBody.find_all("tr")  # type: ignore
+
+        tournamentGameList = []
+        for row in rows:
+            statsDict = {}
+            for cell in row.find_all(["td"]):
+                statName = cell.get("data-stat")
+                statValue = cell.text.strip()
+                statsDict[statName] = statValue
+
+        gameDate = self.getDateFromTableValue(statsDict.get("date", None))
+        gameLocation = self.getGameLocationFromTableValue(statsDict.get("game_location", ""))
+        gameResult = self.getGameResultFromTableValue(statsDict.get("game_result", None))
+
+        tournamentGame = TournamentGame(
+            team_name=statsDict.get("team_name_abbr", None),
+            team_seed=int(statsDict.get("ncaa_tourn_seed", 0)),
+            date=gameDate,
+            game_location=gameLocation,
+            opp_name=statsDict.get("opp_name_abbr", None),
+            opp_seed=int(statsDict.get("ncaa_tourn_seed_opp", 0)),
+            team_score=gameResult.team_score if gameResult else None,
+            opp_score=gameResult.opp_score if gameResult else None,
+            result=gameResult.result if gameResult else None,
+            round=int(statsDict.get("ncaa_tourn_round", "NA")),
+            region=statsDict.get("ncaa_tourn_region", "NA")
+        )
+
+        tournamentGameList.append(tournamentGame)
+
+        return tournamentGameList
+
+
     def getGameLocationFromTableValue(self, tableValue: str) -> str:
         if tableValue == "@":
             return "AWAY"
@@ -108,7 +152,25 @@ class Parser:
         else:
             filteredDate = re.sub(r"[^0-9-]", "", tableValue)
             return filteredDate
-            
+        
+    # def getRoundFromTableValue(self, tableValue: str) -> str:
+    #     if tableValue is None:
+    #         raise ValueError("round table value cannot be None")
+    #     match tableValue.strip():
+    #         case "First 4":
+    #             return "First Four"
+    #         case "Rnd of 64":
+    #             return "64"
+    #         case "Rnd of 32":
+    #             return "32"
+    #         case "Rnd of 16":
+    #             return "16"
+    #         case "Rnd of 8":
+    #             return "8"
+    #         case "National Semi":
+    #             return "National Semi"
+    #         case "National Final":
+
 
     def hasReachedEndOfOffset(self, soup: BeautifulSoup) -> bool:
         noDataPtag = soup.find("p", string="Sorry, there are no results for your search.")

@@ -1,5 +1,5 @@
 import pytest
-from StatHead.models.GameMatchupData import GameMatchupData
+from StatHead.models.RegSeasonGame import RegSeasonGame
 
 
 def test_parseTeamData_returns_team_ids(parser):
@@ -35,46 +35,46 @@ def test_parseResultTableValueToGameResult_multipleOvertimes(parser):
 
 
 # Split into three tests, one for each game
-def test_parseStatPageHtmlString_game1(parser, matchup_game1_html):
-    game_data_list = parser.parseStatPageHtmlString(matchup_game1_html)
+def test_parseRegSeasonPageHtmlString_game1(parser, matchup_game1_html):
+    game_data_list = parser.parseRegSeasonPageHtmlString(matchup_game1_html)
     assert len(game_data_list) == 1
     game = game_data_list[0]
-    assert isinstance(game, GameMatchupData)
-    assert game.team_name_abbr == "Alabama"
+    assert isinstance(game, RegSeasonGame)
+    assert game.team_name == "Alabama"
     assert game.game_location == "HOME"
-    assert game.opp_name_abbr == "Mercer"
+    assert game.opp_name == "Mercer"
     assert game.team_score == 101
     assert game.opp_score == 44
     assert game.result == "W"
     assert game.overtime == 0
 
-def test_parseStatPageHtmlString_game2(parser, matchup_game2_html):
-    game_data_list = parser.parseStatPageHtmlString(matchup_game2_html)
+def test_parseRegSeasonPageHtmlString_game2(parser, matchup_game2_html):
+    game_data_list = parser.parseRegSeasonPageHtmlString(matchup_game2_html)
     assert len(game_data_list) == 1
     game = game_data_list[0]
-    assert isinstance(game, GameMatchupData)
-    assert game.team_name_abbr == "Alabama"
+    assert isinstance(game, RegSeasonGame)
+    assert game.team_name == "Alabama"
     assert game.game_location == "NEUTRAL"
-    assert game.opp_name_abbr == "Wisconsin"
+    assert game.opp_name == "Wisconsin"
     assert game.team_score == 71
     assert game.opp_score == 56
     assert game.result == "W"
     assert game.overtime == 0
 
-def test_parseStatPageHtmlString_game3(parser, matchup_game3_html):
-    game_data_list = parser.parseStatPageHtmlString(matchup_game3_html)
+def test_parseRegSeasonPageHtmlString_game3(parser, matchup_game3_html):
+    game_data_list = parser.parseRegSeasonPageHtmlString(matchup_game3_html)
     assert len(game_data_list) == 1
     game = game_data_list[0]
-    assert isinstance(game, GameMatchupData)
-    assert game.team_name_abbr == "Minnesota"
+    assert isinstance(game, RegSeasonGame)
+    assert game.team_name == "Minnesota"
     assert game.game_location == "AWAY"
-    assert game.opp_name_abbr == "Wisconsin"
+    assert game.opp_name == "Wisconsin"
     assert game.team_score == 71
     assert game.opp_score == 76
     assert game.result == "L"
     assert game.overtime == 1
 
 
-def test_parseStatPageHtmlString_endOfOffset_returnsEmptyList(parser, endOfOffsetHtml):
-    game_data_list = parser.parseStatPageHtmlString(endOfOffsetHtml)
-    assert game_data_list == []
+def test_parseRegSeasonPageHtmlString_endOfOffset_returnsEmptyList(parser, endOfOffsetHtml):
+    game_data_list = parser.parseRegSeasonPageHtmlString(endOfOffsetHtml)
+    assert game_data_list == [] 

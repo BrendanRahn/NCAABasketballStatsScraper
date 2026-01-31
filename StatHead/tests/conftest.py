@@ -6,7 +6,7 @@ import os
 #found, look at test_parser file
 sys.path.append("../..")
 sys.path.append("..")
-from StatHead.parser import Parser
+from StatHead.statheadParser import Parser
 
 
 # Fixtures for each individual game row html

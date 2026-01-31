@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
     
-class GameMatchupData(BaseModel):
+class RegSeasonGame(BaseModel):
     team_name: str
     date: datetime
     game_location: str

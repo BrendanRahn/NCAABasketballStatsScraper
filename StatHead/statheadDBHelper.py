@@ -4,7 +4,8 @@ from psycopg.rows import class_row
 import os
 from . import statheadQUERIES
 from .models.RunLog import RunLog
-from .models.GameMatchupData import GameMatchupData
+from .models.RegSeasonGame import RegSeasonGame
+from models.TournamentGame import TournamentGame
 
 class DatabaseHelper:
 
@@ -39,15 +40,22 @@ class DatabaseHelper:
         self.connection.commit()
         cursor.close()
 
-    def createGameMatchupDataTable(self):
+    def createRegularSeasonGamesTable(self):
         cursor = self.connection.cursor()
-        cursor.execute(query=statheadQUERIES.createGameMatchupDataTable)
+        cursor.execute(query=statheadQUERIES.createRegularSeasonGamesTable)
         self.connection.commit()
         cursor.close()
 
-    def getLatestRunLog(self):
+    def createTournamentGamesTable(self):
+        cursor = self.connection.cursor()
+        cursor.execute(query=statheadQUERIES.createTournamentGamesTable)
+        self.connection.commit()
+        cursor.close()
+
+    def getLatestRunLogByCompType(self, comp_type: str):
         cursor = self.connection.cursor(row_factory=class_row(RunLog))
-        cursor.execute(query=statheadQUERIES.getLatestRunLog)
+        cursor.execute(query=statheadQUERIES.getLatestRunLogByCompType, 
+                       params={"comp_type": comp_type})
         result = cursor.fetchone()
         cursor.close()
         return result
@@ -62,11 +70,20 @@ class DatabaseHelper:
         cursor.close()
 
     #TODO: create test case to validate all 200 rows inserted correctly
-    def insertGameMatchupData(self, gameMatchupData: list[GameMatchupData]):
+    def insertRegularSeasonGames(self, games: list[RegSeasonGame]):
         cursor = self.connection.cursor()
         cursor.executemany(
-            query=statheadQUERIES.insertGameMatchupData,
-            params_seq=[game.model_dump() for game in gameMatchupData]
+            query=statheadQUERIES.insertRegularSeasonGame,
+            params_seq=[game.model_dump() for game in games]
+        )
+        self.connection.commit()
+        cursor.close()
+
+    def insertTournamentGames(self, games: list[TournamentGame]):
+        cursor = self.connection.cursor()
+        cursor.executemany(
+            query=statheadQUERIES.insertTournamentGame,
+            params_seq=[game.model_dump() for game in games]
         )
         self.connection.commit()
         cursor.close()
